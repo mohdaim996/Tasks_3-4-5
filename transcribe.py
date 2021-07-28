@@ -13,7 +13,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+from playsound import playsound
 import argparse
 import base64
 import configparser
@@ -138,6 +138,7 @@ def savemp3(val):
     with open('output.mp3', 'wb') as audio_file:
         res = tts.synthesize(val, accept='audio/mp3', voice='ar-MS_OmarVoice').get_result()
         audio_file.write(res.content)
+    playsound('output.mp3')
 def on_message(self, msg):
     """Print whatever messages come in.
 
