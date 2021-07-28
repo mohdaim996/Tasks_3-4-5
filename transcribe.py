@@ -24,7 +24,7 @@ import sys
 import pyaudio
 import websocket
 from websocket._abnf import ABNF
-from ibm_watson import AssistantV2
+from ibm_watson import AssistantV2, TextToSpeechV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 authenticator = IAMAuthenticator('PHu94tmbiKM-wdYwOkhQZUbCjf1WiuB77fS1NrQm2K7X')
@@ -39,7 +39,9 @@ response = assistant.create_session(
     assistant_id='036bd9b1-f69a-4e32-9221-ea16fb0d252a'
         ).get_result()
 
-    
+authenticator_tts = IAMAuthenticator('ULna6hcd0SqFR1ox1De01FlEVT46ntmJq0n_sgPic65s')
+tts = TextToSpeechV1(authenticator = authenticator_tts)
+tts.set_service_url('https://api.us-south.text-to-speech.watson.cloud.ibm.com/instances/068c5a13-d811-4fb5-9b77-d6149544c56e')
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 # Even if your default input is multi channel (like a webcam mic),
@@ -122,9 +124,20 @@ def read_audio(ws, timeout):
         'text':  file1.read()
     }
 ).get_result()
-
-    print(resp['output']['generic'][0]['text'][::-1])
-
+    print(json.dumps(resp, indent=2))
+    try:
+        print(resp['output']['generic'][0]['text'][::-1])
+        savemp3(resp['output']['generic'][0]['text'][::-1])
+    except:
+        resp = u"لم افهم"
+        print(resp[::-1])
+        savemp3(resp)
+    
+        
+def savemp3(val):
+    with open('output.mp3', 'wb') as audio_file:
+        res = tts.synthesize(val, accept='audio/mp3', voice='ar-MS_OmarVoice').get_result()
+        audio_file.write(res.content)
 def on_message(self, msg):
     """Print whatever messages come in.
 
